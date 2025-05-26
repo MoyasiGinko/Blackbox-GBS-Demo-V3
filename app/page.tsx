@@ -1,18 +1,20 @@
-'use client'
+"use client";
 
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchServices } from '../store/serviceSlice'
-import { RootState, AppDispatch } from '../store/store'
-import Navbar from './components/Navbar'
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchServices } from "../store/serviceSlice";
+import { RootState, AppDispatch } from "../store/store";
+import Navbar from "../components/Navbar";
 
 export default function HomePage() {
-  const dispatch = useDispatch<AppDispatch>()
-  const { services, loading, error } = useSelector((state: RootState) => state.service)
+  const dispatch = useDispatch<AppDispatch>();
+  const { services, loading, error } = useSelector(
+    (state: RootState) => state.service
+  );
 
   useEffect(() => {
-    dispatch(fetchServices())
-  }, [dispatch])
+    dispatch(fetchServices());
+  }, [dispatch]);
 
   return (
     <>
@@ -23,7 +25,10 @@ export default function HomePage() {
         {error && <p className="text-red-500">{error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {services.map((service) => (
-            <div key={service.id} className="border rounded p-4 shadow hover:shadow-lg transition">
+            <div
+              key={service.id}
+              className="border rounded p-4 shadow hover:shadow-lg transition"
+            >
               <h2 className="text-xl font-semibold mb-2">{service.name}</h2>
               <p>{service.description}</p>
             </div>
@@ -31,5 +36,5 @@ export default function HomePage() {
         </div>
       </main>
     </>
-  )
+  );
 }

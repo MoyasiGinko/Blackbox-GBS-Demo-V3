@@ -1,22 +1,27 @@
-'use client'
+"use client";
 
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchSubscriptions, purchaseSubscription } from '../../store/subscriptionSlice'
-import { RootState, AppDispatch } from '../../store/store'
-import Navbar from '../components/Navbar'
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchSubscriptions,
+  purchaseSubscription,
+} from "../../store/subscriptionSlice";
+import { RootState, AppDispatch } from "../../store/store";
+import Navbar from "../../components/Navbar";
 
 export default function SubscriptionsPage() {
-  const dispatch = useDispatch<AppDispatch>()
-  const { plans, loading, error } = useSelector((state: RootState) => state.subscription)
+  const dispatch = useDispatch<AppDispatch>();
+  const { plans, loading, error } = useSelector(
+    (state: RootState) => state.subscription
+  );
 
   useEffect(() => {
-    dispatch(fetchSubscriptions())
-  }, [dispatch])
+    dispatch(fetchSubscriptions());
+  }, [dispatch]);
 
   const handlePurchase = (planId: number) => {
-    dispatch(purchaseSubscription({ plan_id: planId }))
-  }
+    dispatch(purchaseSubscription({ plan_id: planId }));
+  };
 
   return (
     <>
@@ -27,10 +32,15 @@ export default function SubscriptionsPage() {
         {error && <p className="text-red-500">{error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {plans.map((plan) => (
-            <div key={plan.id} className="border rounded p-6 shadow hover:shadow-lg transition flex flex-col justify-between">
+            <div
+              key={plan.id}
+              className="border rounded p-6 shadow hover:shadow-lg transition flex flex-col justify-between"
+            >
               <div>
                 <h2 className="text-xl font-semibold mb-2">{plan.name}</h2>
-                <p className="mb-4">${plan.price} - {plan.duration_days} days access</p>
+                <p className="mb-4">
+                  ${plan.price} - {plan.duration_days} days access
+                </p>
               </div>
               <button
                 onClick={() => handlePurchase(plan.id)}
@@ -43,5 +53,5 @@ export default function SubscriptionsPage() {
         </div>
       </main>
     </>
-  )
+  );
 }

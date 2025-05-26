@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import React from 'react'
-import Link from 'next/link'
-import { useSelector, useDispatch } from 'react-redux'
-import { RootState, AppDispatch } from '../../store/store'
-import { logout } from '../../store/authSlice'
+import React from "react";
+import Link from "next/link";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../store/store";
+import { logout } from "../store/authSlice";
 
 export default function Navbar() {
-  const dispatch = useDispatch<AppDispatch>()
-  const auth = useSelector((state: RootState) => state.auth)
+  const dispatch = useDispatch<AppDispatch>();
+  const auth = useSelector((state: RootState) => state.auth);
 
   const handleLogout = () => {
-    dispatch(logout())
-  }
+    dispatch(logout());
+  };
 
   return (
     <nav className="bg-black text-white px-6 py-4 flex justify-between items-center">
@@ -37,5 +37,5 @@ export default function Navbar() {
         )}
       </div>
     </nav>
-  )
+  );
 }
