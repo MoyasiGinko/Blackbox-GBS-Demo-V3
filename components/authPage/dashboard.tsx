@@ -2,25 +2,11 @@
 ("use client");
 
 import React from "react";
-import { useAuth } from "../hooks/useAuth";
-import {
-  useServices,
-  useUserServices,
-  useSubscriptions,
-} from "../hooks/useApi";
-import { useSession } from "../hooks/useSession";
-import { formatUtils } from "../utils/format";
+import { useAuth } from "../../context/AuthContext";
 
 const DashboardPage: React.FC = () => {
-  const { user, logout } = useAuth();
-  const { sessionInfo } = useSession();
-
-  // Use API hooks
-  const { data: services, isLoading: servicesLoading } = useServices();
-  const { data: userServices, isLoading: userServicesLoading } =
-    useUserServices();
-  const { data: subscriptions, isLoading: subscriptionsLoading } =
-    useSubscriptions();
+  const { state, logout } = useAuth();
+  const { user } = state;
 
   const handleLogout = async () => {
     await logout();
@@ -44,17 +30,9 @@ const DashboardPage: React.FC = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Session Info */}
-              {sessionInfo && (
-                <div className="text-sm text-gray-500">
-                  Session expires:{" "}
-                  {formatUtils.formatDate(sessionInfo.expiresAt, "relative")}
-                </div>
-              )}
-
               <button
                 onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700"
+                className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
               >
                 Logout
               </button>
@@ -64,97 +42,9 @@ const DashboardPage: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Services Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">S</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Available Services
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {servicesLoading ? "Loading..." : services?.length || 0}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* User Services Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">U</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Your Services
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {userServicesLoading
-                          ? "Loading..."
-                          : userServices?.length || 0}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Subscriptions Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">$</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Active Subscriptions
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {subscriptionsLoading
-                          ? "Loading..."
-                          : subscriptions?.length || 0}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="mt-8">
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                  Recent Activity
-                </h3>
-                <div className="text-sm text-gray-500">
-                  No recent activity to display.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <main className="max-w-5xl mx-auto p-6">
+        <h2 className="text-2xl font-semibold mb-4">Your Dashboard Content</h2>
+        {/* Add more dashboard content here */}
       </main>
     </div>
   );

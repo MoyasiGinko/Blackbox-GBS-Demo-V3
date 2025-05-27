@@ -1,6 +1,13 @@
 // utils/sessionManager.ts
-import { SessionData, SessionConfig, User, AuthTokens } from "@/types/auth";
+import { SessionData, User, AuthTokens } from "@/types/auth";
 import { getCookie, setCookie, deleteCookie } from "./cookies";
+
+export interface SessionConfig {
+  tokenRefreshThreshold: number;
+  maxRetries: number;
+  retryDelay: number;
+  sessionTimeout: number;
+}
 
 class SessionManagerClass {
   private session: SessionData | null = null;
@@ -69,6 +76,7 @@ class SessionManagerClass {
         this.SESSION_KEY,
         JSON.stringify({
           user: sessionData.user,
+          tokens: sessionData.tokens,
           expiresAt: sessionData.expiresAt,
         }),
         {
@@ -83,7 +91,7 @@ class SessionManagerClass {
         maxAge: this.config.sessionTimeout * 60,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        httpOnly: false, // Note: In production, this should be httpOnly
+        httpOnly: false, // In production, should be httpOnly
       });
     }
   }
@@ -139,40 +147,8 @@ class SessionManagerClass {
 
   getUser(): User | null {
     const session = this.getSession();
-    return session?.user || null;
-  }
-
-  updateUser(user: User): void {
-    if (!this.session) return;
-
-    this.session = {
-      ...this.session,
-      user,
-    };
-
-    this.setSession(this.session);
-  }
-
-  getSessionInfo() {
-    const session = this.getSession();
-    if (!session) return null;
-
-    return {
-      user: session.user,
-      expiresAt: session.expiresAt,
-      isValid: this.isSessionValid(),
-      shouldRefresh: this.shouldRefreshToken(),
-      timeUntilExpiry: session.expiresAt - Date.now(),
-    };
+    return session && session.user ? session.user : null;
   }
 }
 
-// Singleton instance
-export const sessionManager = new SessionManagerClass();
-
-// Factory function for custom configurations
-export const createSessionManager = (config?: Partial<SessionConfig>) => {
-  return new SessionManagerClass(config);
-};
-
-export default sessionManager;
+export const SessionManager = new SessionManagerClass();

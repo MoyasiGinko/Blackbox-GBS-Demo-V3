@@ -2,7 +2,7 @@
 ("use client");
 
 import React from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 
 interface ProtectedRouteProps {
@@ -16,7 +16,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRole,
   fallback,
 }) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { state } = useAuth();
+  const { user, isAuthenticated, isLoading } = state;
   const router = useRouter();
 
   // Show loading state
