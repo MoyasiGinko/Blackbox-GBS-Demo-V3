@@ -41,46 +41,13 @@ export interface AxiosError<T = any> {
   stack?: string;
 }
 
-export interface AxiosInstance {
-  (config: AxiosRequestConfig): Promise<AxiosResponse>;
-  (url: string, config?: AxiosRequestConfig): Promise<AxiosResponse>;
-  defaults: AxiosRequestConfig;
+// Use the actual Axios instance type and extend it if needed
+export type AxiosInstance = typeof axios & {
   interceptors: {
     request: AxiosInterceptorManager<AxiosRequestConfig>;
     response: AxiosInterceptorManager<AxiosResponse>;
   };
-  get<T = any>(
-    url: string,
-    config?: AxiosRequestConfig
-  ): Promise<AxiosResponse<T>>;
-  delete<T = any>(
-    url: string,
-    config?: AxiosRequestConfig
-  ): Promise<AxiosResponse<T>>;
-  head<T = any>(
-    url: string,
-    config?: AxiosRequestConfig
-  ): Promise<AxiosResponse<T>>;
-  options<T = any>(
-    url: string,
-    config?: AxiosRequestConfig
-  ): Promise<AxiosResponse<T>>;
-  post<T = any>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig
-  ): Promise<AxiosResponse<T>>;
-  put<T = any>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig
-  ): Promise<AxiosResponse<T>>;
-  patch<T = any>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig
-  ): Promise<AxiosResponse<T>>;
-}
+};
 
 export interface AxiosInterceptorManager<V> {
   use<T = V>(
@@ -99,7 +66,7 @@ class AxiosInterceptorManagerClass {
   private isRefreshing = false;
   private failedQueue: QueuedRequest[] = [];
 
-  setupInterceptors(apiClient: AxiosInstance): void {
+  setupInterceptors(apiClient: any): void {
     this.setupRequestInterceptor(apiClient);
     this.setupResponseInterceptor(apiClient);
   }
@@ -171,7 +138,14 @@ class AxiosInterceptorManagerClass {
                 ...originalRequest.headers,
                 Authorization: `Bearer ${token}`,
               };
-              return apiClient(originalRequest);
+              // Ensure url is a string to satisfy Axios type requirements
+              if (!originalRequest.url) {
+                throw new Error("Request config is missing a URL.");
+              }
+              return apiClient({
+                ...originalRequest,
+                url: originalRequest.url,
+              });
             });
           }
 
@@ -203,7 +177,11 @@ class AxiosInterceptorManagerClass {
               Authorization: `Bearer ${newTokens.access_token}`,
             };
 
-            return apiClient(originalRequest);
+            // Ensure url is a string to satisfy Axios type requirements
+            if (!originalRequest.url) {
+              throw new Error("Request config is missing a URL.");
+            }
+            return apiClient({ ...originalRequest, url: originalRequest.url });
           } catch (refreshError) {
             // Refresh failed, clear session and redirect to login
             this.processQueue(refreshError, null);
@@ -289,27 +267,12 @@ export const createApiClient = (
       "Content-Type": "application/json",
     },
     ...options,
-  }) as unknown as AxiosInstance;
+  }) as AxiosInstance;
 
   // Setup interceptors
   interceptorManager.setupInterceptors(apiClient);
 
-  // Add missing 'options' method to match AxiosInstance interface
-  const typedApiClient = apiClient as AxiosInstance;
-  if (!("options" in typedApiClient)) {
-    (typedApiClient as any).options = function <T = any>(
-      url: string,
-      config?: AxiosRequestConfig
-    ): Promise<AxiosResponse<T>> {
-      return (apiClient as any).request({
-        ...config,
-        method: "options",
-        url,
-      });
-    };
-  }
-
-  return typedApiClient;
+  return apiClient;
 };
 
 // Default API client (backwards compatible with existing code)
