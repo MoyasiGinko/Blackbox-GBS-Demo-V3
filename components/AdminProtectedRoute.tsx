@@ -24,7 +24,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
   useEffect(() => {
     const checkAuthentication = async () => {
       if (isLoading) return;
-      if (!isAuthenticated || user?.role !== "admin") {
+      if (!isAuthenticated || !user?.is_admin) {
         setIsRedirecting(true);
         setTimeout(() => {
           router.replace("/login");
@@ -58,7 +58,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
   }
 
   // If not admin, show fallback or access denied
-  if (user?.role !== "admin") {
+  if (!user?.is_admin) {
     return (
       fallback || (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">

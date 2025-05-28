@@ -70,6 +70,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // 2. Fetch the real user profile (now that token is available)
       const user = (await profileApi.getProfile()).data;
 
+      // If not verified, clear session and do not log in
+      if (!user.is_verified) {
+        if (typeof window !== "undefined") {
+          SessionManager.clearSession();
+        }
+        setState({
+          user: null,
+          tokens: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: "Account is not verified. Please verify your email before logging in.",
+        });
+        return;
+      }
+
       // 3. Update session with real user
       if (typeof window !== "undefined") {
         SessionManager.setSession({ user, tokens, expiresAt });

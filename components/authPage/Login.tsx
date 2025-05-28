@@ -38,7 +38,7 @@ const LoginPage: React.FC = () => {
           setIsRedirecting(true);
           // Add small delay to show redirecting message
           setTimeout(() => {
-            if (state.user?.role === "admin") {
+            if (state.user?.is_admin) {
               router.replace("/admin/dashboard");
             } else {
               router.replace("/user/dashboard");
