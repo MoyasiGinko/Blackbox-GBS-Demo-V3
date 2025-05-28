@@ -23,7 +23,7 @@ export default function Navbar() {
       <div className="space-x-4">
         {isAuthenticated && user ? (
           <>
-            <span>Welcome, {user.username}</span>
+            <span>Welcome, {user.full_name}</span>
             <button
               onClick={handleLogout}
               className="bg-white text-black px-3 py-1 rounded hover:bg-gray-200 transition"
