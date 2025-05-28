@@ -8,7 +8,7 @@ import { validateForm, loginSchema } from "../../utils/validation";
 import { useRouter } from "next/navigation";
 
 const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+  const { state, login } = useAuth();
   const { addNotification } = useNotifications();
   const router = useRouter();
 
@@ -39,7 +39,8 @@ const LoginPage: React.FC = () => {
         title: "Login Successful",
         message: "Welcome back!",
       });
-      router.push("/dashboard");
+      console.log("User successfully logged in, (wait) not redirecting...");
+      // router.push("/dashboard");
     } catch (error: any) {
       addNotification({
         type: "error",
@@ -56,6 +57,13 @@ const LoginPage: React.FC = () => {
     // Clear validation error for this field
     if (validationErrors[name]) {
       setValidationErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+
+    if (state.isAuthenticated) {
+      console.log(
+        "Checking if the context works, user is already authenticated, redirecting..."
+      );
+      // router.push("/dashboard");
     }
   };
 
