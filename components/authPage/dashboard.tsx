@@ -1,5 +1,5 @@
 // pages/dashboard.tsx - Example dashboard using the API hooks
-("use client");
+"use client";
 
 import React from "react";
 import { useAuth } from "../../context/AuthContext";

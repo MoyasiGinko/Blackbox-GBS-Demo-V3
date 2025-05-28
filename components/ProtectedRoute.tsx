@@ -1,5 +1,5 @@
 // components/ProtectedRoute.tsx - Route protection component
-("use client");
+"use client";
 
 import React from "react";
 import { useAuth } from "../context/AuthContext";
