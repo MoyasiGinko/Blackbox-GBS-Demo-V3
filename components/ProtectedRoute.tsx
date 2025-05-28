@@ -1,7 +1,7 @@
-// components/ProtectedRoute.tsx - Route protection component
+// components/ProtectedRoute.tsx - Enhanced secure route protection component
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -19,9 +19,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { state } = useAuth();
   const { user, isAuthenticated, isLoading } = state;
   const router = useRouter();
+  const [checked, setChecked] = useState(false);
 
-  // Show loading state
-  if (isLoading) {
+  useEffect(() => {
+    // Only check after loading is done
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.replace("/login");
+      }
+      setChecked(true);
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // Show loading state while checking or loading
+  if (isLoading || !checked) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500"></div>
@@ -29,14 +40,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Redirect if not authenticated
-  if (!isAuthenticated) {
-    router.push("/login");
-    return null;
-  }
-
-  // Check role requirements
-  if (requiredRole && user?.role !== requiredRole) {
+  // Show access denied for authenticated users without proper role
+  if (isAuthenticated && requiredRole && user?.role !== requiredRole) {
     return (
       fallback || (
         <div className="min-h-screen flex items-center justify-center">
@@ -51,6 +56,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
+  // Only render children when fully authorized
   return <>{children}</>;
 };
 
