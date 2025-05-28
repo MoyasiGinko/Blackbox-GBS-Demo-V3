@@ -1,4 +1,4 @@
-import DashboardPage from "@/components/authPage/dashboard";
+import DashboardPage from "@/components/userPanel/dashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import React from "react";
 
