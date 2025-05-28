@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
   fallback?: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+const UserProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requiredRole,
   fallback,
@@ -243,4 +243,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default UserProtectedRoute;

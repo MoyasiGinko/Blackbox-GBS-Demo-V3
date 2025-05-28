@@ -1,11 +1,11 @@
 import DashboardPage from "@/components/userPanel/dashboard";
-import ProtectedRoute from "@/components/UserProtectedRoute";
+import UserProtectedRoute from "@/context/UserProtectedRoute";
 import React from "react";
 
 export default function Page() {
   return (
-    <ProtectedRoute>
+    <UserProtectedRoute>
       <DashboardPage />
-    </ProtectedRoute>
+    </UserProtectedRoute>
   );
 }
