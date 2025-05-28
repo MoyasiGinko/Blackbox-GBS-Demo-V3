@@ -4,6 +4,8 @@ import UsersModule from "@/components/adminPanel/modules/UsersModule";
 import ServicesModule from "@/components/adminPanel/modules/ServicesModule";
 import PaymentsModule from "@/components/adminPanel/modules/PaymentsModule";
 import SettingsModule from "@/components/adminPanel/modules/SettingsModule";
+import { cookies } from "next/headers";
+import CookiesModule from "@/components/adminPanel/modules/CookiesModule";
 
 export default function AdminModulePage({
   params,
@@ -19,6 +21,7 @@ export default function AdminModulePage({
     services: <ServicesModule />,
     payments: <PaymentsModule />,
     settings: <SettingsModule />,
+    cookies: <CookiesModule />,
     // Add more modules as needed
   };
 

@@ -11,6 +11,7 @@ import {
   CogIcon,
   CreditCardIcon,
   ServerIcon,
+  CakeIcon,
 } from "@heroicons/react/24/outline";
 
 const links = [
@@ -22,6 +23,7 @@ const links = [
     href: "/admin/dashboard/payments",
     icon: CreditCardIcon,
   },
+  { label: "Cookies", href: "/admin/dashboard/cookies", icon: CakeIcon },
   { label: "Settings", href: "/admin/dashboard/settings", icon: CogIcon },
 ];
 
