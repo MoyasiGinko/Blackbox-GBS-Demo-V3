@@ -24,52 +24,42 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
-    const checkAuthentication = async () => {
-      // Log user information for debugging
-      console.log("User information:", user);
-      console.log("Authentication status:", isAuthenticated);
+    if (isLoading) return;
 
-      // Wait for auth context to finish loading
-      if (isLoading) {
-        console.log("Auth context is still loading...");
-        return; // Keep showing loading while auth context loads
-      }
-
-      // Step 1: Check if authenticated
-      if (!isAuthenticated) {
-        console.log("User is not authenticated, redirecting to login");
+    // Not authenticated: redirect to login
+    if (!isAuthenticated) {
+      if (!isRedirecting) {
         setIsRedirecting(true);
-        // Add small delay to show redirecting message
-        setTimeout(() => {
-          router.replace("/login");
-        }, 500);
-        return;
+        router.replace("/login");
       }
+      return;
+    }
 
-      // Step 2: Check admin status and verification for specific redirection
-      console.log("Checking admin status:", user?.is_admin);
-      console.log("Checking verification status:", user?.is_verified);
+    // Not verified: clear session and redirect to login
+    if (!user?.is_verified) {
+      if (!isRedirecting) {
+        setIsRedirecting(true);
+        if (typeof window !== "undefined") {
+          localStorage.clear();
+          sessionStorage.clear();
+        }
+        router.replace("/login");
+      }
+      return;
+    }
 
-      if (user?.is_admin === true && user?.is_verified === true) {
-        console.log(
-          "User is admin and verified, redirecting to admin dashboard"
-        );
+    // Admin and verified: redirect to admin dashboard
+    if (user?.is_admin === true && user?.is_verified === true) {
+      if (!isRedirecting) {
+        setIsRedirecting(true);
         router.replace("/admin/dashboard");
-        return;
       }
+      return;
+    }
 
-      // If we reach here, user is authenticated but not an admin or not verified
-      // Small delay to prevent flash (optional)
-      console.log(
-        "Authentication checks complete, rendering protected content"
-      );
-      setTimeout(() => {
-        setIsChecking(false);
-      }, 300);
-    };
-
-    checkAuthentication();
-  }, [isLoading, isAuthenticated, router, user]);
+    // Authenticated, verified, and not admin: allow access
+    setIsChecking(false);
+  }, [isLoading, isAuthenticated, user, router, isRedirecting]);
 
   // ALWAYS show loading state first - this is the key!
   if (isChecking || isLoading || isRedirecting) {

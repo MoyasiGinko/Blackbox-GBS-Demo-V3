@@ -22,54 +22,42 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
-    const checkAuthentication = async () => {
-      if (isLoading) return;
+    if (isLoading) return;
 
-      // Log user information for debugging
-      console.log("User information:", user);
-      console.log("Authentication status:", isAuthenticated);
-
-      // Step 1: Check if user is authenticated
-      if (!isAuthenticated) {
-        console.log("User is not authenticated, redirecting to login");
+    // Not authenticated: redirect to login
+    if (!isAuthenticated) {
+      if (!isRedirecting) {
         setIsRedirecting(true);
-        setTimeout(() => {
-          router.replace("/login");
-        }, 500);
-        return;
+        router.replace("/login");
       }
+      return;
+    }
 
-      // Step 2: Check if user is verified
-      if (isAuthenticated && user?.is_verified) {
-        console.log("User is authenticated and verified");
-
-        // Step 3: Check if user is admin
-        if (!user?.is_admin) {
-          console.log("User is not admin, redirecting to user dashboard");
-          setIsRedirecting(true);
-          setTimeout(() => {
-            router.replace("/user/dashboard");
-          }, 500);
-          return;
+    // Not verified: clear session and redirect to login
+    if (!user?.is_verified) {
+      if (!isRedirecting) {
+        setIsRedirecting(true);
+        if (typeof window !== "undefined") {
+          localStorage.clear();
+          sessionStorage.clear();
         }
-
-        // User is authenticated, verified, and admin - allow access
-        console.log("User is admin, allowing access");
-        setTimeout(() => {
-          setIsChecking(false);
-        }, 300);
-        return;
+        router.replace("/login");
       }
+      return;
+    }
 
-      // If we get here, user is authenticated but not verified
-      console.log("User is authenticated but not verified");
-      setTimeout(() => {
-        setIsChecking(false);
-      }, 300);
-    };
+    // Authenticated and verified, but not admin: redirect to user dashboard
+    if (!user?.is_admin) {
+      if (!isRedirecting) {
+        setIsRedirecting(true);
+        router.replace("/user/dashboard");
+      }
+      return;
+    }
 
-    checkAuthentication();
-  }, [isLoading, isAuthenticated, user, router]);
+    // Authenticated, verified, and admin: allow access
+    setIsChecking(false);
+  }, [isLoading, isAuthenticated, user, router, isRedirecting]);
 
   if (isChecking || isLoading || isRedirecting) {
     return (
