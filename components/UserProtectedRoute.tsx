@@ -25,13 +25,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   useEffect(() => {
     const checkAuthentication = async () => {
+      // Log user information for debugging
+      console.log("User information:", user);
+      console.log("Authentication status:", isAuthenticated);
+
       // Wait for auth context to finish loading
       if (isLoading) {
+        console.log("Auth context is still loading...");
         return; // Keep showing loading while auth context loads
       }
 
-      // Now we can check authentication status
+      // Step 1: Check if authenticated
       if (!isAuthenticated) {
+        console.log("User is not authenticated, redirecting to login");
         setIsRedirecting(true);
         // Add small delay to show redirecting message
         setTimeout(() => {
@@ -40,21 +46,32 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         return;
       }
 
-      // If we reach here, user is authenticated
+      // Step 2: Check admin status and verification for specific redirection
+      console.log("Checking admin status:", user?.is_admin);
+      console.log("Checking verification status:", user?.is_verified);
+
+      if (user?.is_admin === true && user?.is_verified === true) {
+        console.log(
+          "User is admin and verified, redirecting to admin dashboard"
+        );
+        router.replace("/admin/dashboard");
+        return;
+      }
+
+      // If we reach here, user is authenticated but not an admin or not verified
       // Small delay to prevent flash (optional)
+      console.log(
+        "Authentication checks complete, rendering protected content"
+      );
       setTimeout(() => {
         setIsChecking(false);
       }, 300);
     };
 
     checkAuthentication();
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, user]);
 
   // ALWAYS show loading state first - this is the key!
-  // Show loading if:
-  // 1. Still checking authentication (initial state)
-  // 2. Auth context is still loading
-  // 3. Currently redirecting
   if (isChecking || isLoading || isRedirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -77,8 +94,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       </div>
     );
   }
-
-  // At this point: !isChecking && !isLoading && !isRedirecting && isAuthenticated
 
   // Check role-based access for authenticated users
   if (requiredRole && user?.role !== requiredRole) {

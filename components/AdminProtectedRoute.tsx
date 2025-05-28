@@ -24,17 +24,50 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
   useEffect(() => {
     const checkAuthentication = async () => {
       if (isLoading) return;
-      if (!isAuthenticated || !user?.is_admin) {
+
+      // Log user information for debugging
+      console.log("User information:", user);
+      console.log("Authentication status:", isAuthenticated);
+
+      // Step 1: Check if user is authenticated
+      if (!isAuthenticated) {
+        console.log("User is not authenticated, redirecting to login");
         setIsRedirecting(true);
         setTimeout(() => {
           router.replace("/login");
         }, 500);
         return;
       }
+
+      // Step 2: Check if user is verified
+      if (isAuthenticated && user?.is_verified) {
+        console.log("User is authenticated and verified");
+
+        // Step 3: Check if user is admin
+        if (!user?.is_admin) {
+          console.log("User is not admin, redirecting to user dashboard");
+          setIsRedirecting(true);
+          setTimeout(() => {
+            router.replace("/user/dashboard");
+          }, 500);
+          return;
+        }
+
+        // User is authenticated, verified, and admin - allow access
+        console.log("User is admin, allowing access");
+        setTimeout(() => {
+          setIsChecking(false);
+        }, 300);
+        return;
+      }
+
+      // If we get here, user is authenticated but not verified
+      console.log("User is authenticated but not verified");
       setTimeout(() => {
         setIsChecking(false);
       }, 300);
     };
+
     checkAuthentication();
   }, [isLoading, isAuthenticated, user, router]);
 
@@ -48,7 +81,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-gray-900">
-              {isRedirecting ? "Redirecting to login..." : "Verifying admin access..."}
+              {isRedirecting ? "Redirecting..." : "Verifying access..."}
             </p>
             <p className="text-xs text-gray-500 mt-1">Please wait a moment</p>
           </div>
@@ -64,14 +97,30 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center max-w-md mx-auto p-8 bg-white rounded-lg shadow-lg">
             <div className="mb-6">
-              <svg className="mx-auto h-20 w-20 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              <svg
+                className="mx-auto h-20 w-20 text-red-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Admin Access Required</h2>
-            <p className="text-gray-600 mb-6">You must be an admin to access this page.</p>
-            <button onClick={() => router.replace("/login")}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              Admin Access Required
+            </h2>
+            <p className="text-gray-600 mb-6">
+              You must be an admin to access this page.
+            </p>
+            <button
+              onClick={() => router.replace("/login")}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+            >
               Go to Login
             </button>
           </div>
