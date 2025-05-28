@@ -8,6 +8,15 @@ const DashboardPage: React.FC = () => {
   const { state, logout } = useAuth();
   const { user } = state;
 
+  // Show loading if user is not yet loaded (should not happen with ProtectedRoute, but for extra safety)
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
   const handleLogout = async () => {
     await logout();
   };
@@ -25,7 +34,7 @@ const DashboardPage: React.FC = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
               <p className="text-sm text-gray-600">
-                Welcome back, {user?.username || "Guest"}!
+                Welcome back, {user.full_name} ({user.email})!
               </p>
             </div>
 
