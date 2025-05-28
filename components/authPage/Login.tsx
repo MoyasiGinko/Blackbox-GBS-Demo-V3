@@ -24,6 +24,20 @@ const LoginPage: React.FC = () => {
     Record<string, string>
   >({});
 
+  // Show notification if redirected due to unverified account
+  useEffect(() => {
+    if (
+      state.error ===
+      "Account is not verified. Please verify your email before logging in."
+    ) {
+      addNotification({
+        type: "error",
+        title: "Account Not Verified",
+        message: state.error,
+      });
+    }
+  }, [state.error, addNotification]);
+
   // Check authentication status on component mount
   useEffect(() => {
     const checkAuthStatus = async () => {

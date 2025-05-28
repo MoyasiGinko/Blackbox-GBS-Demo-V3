@@ -17,49 +17,106 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
   const { user, isAuthenticated, isLoading } = state;
   const router = useRouter();
 
-  // Initialize as checking - this ensures loading shows first
-  const [isChecking, setIsChecking] = useState(true);
+  // Enhanced state management
+  const [authCheckComplete, setAuthCheckComplete] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [currentStep, setCurrentStep] = useState("Initializing...");
 
   useEffect(() => {
-    if (isLoading) return;
+    // Debug logs
+    console.log("[AdminProtectedRoute] user:", user);
+    console.log("[AdminProtectedRoute] isAuthenticated:", isAuthenticated);
+    console.log("[AdminProtectedRoute] isLoading:", isLoading);
+    console.log("[AdminProtectedRoute] authCheckComplete:", authCheckComplete);
 
-    // Not authenticated: redirect to login
-    if (!isAuthenticated) {
-      if (!isRedirecting) {
-        setIsRedirecting(true);
-        router.replace("/login");
-      }
+    // Step 1: Wait for initial auth loading to complete
+    if (isLoading) {
+      setCurrentStep("Checking authentication...");
+      setAuthCheckComplete(false);
       return;
     }
 
-    // Not verified: clear session and redirect to login
-    if (!user?.is_verified) {
-      if (!isRedirecting) {
+    // Step 2: Authentication check is complete, now process the results
+    if (!authCheckComplete) {
+      setCurrentStep("Processing authentication results...");
+
+      // Small delay to ensure state is stable and prevent flash
+      const timer = setTimeout(() => {
+        setAuthCheckComplete(true);
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+
+    // Step 3: Now we can safely make routing decisions
+    if (authCheckComplete && !isRedirecting) {
+      // Case 1: Not authenticated at all
+      if (!isAuthenticated) {
+        setCurrentStep("Redirecting to login...");
+        setIsRedirecting(true);
+        router.replace("/login");
+        return;
+      }
+
+      // Case 2: Authenticated but not verified
+      if (user && !user.is_verified) {
+        setCurrentStep("Account not verified, redirecting...");
         setIsRedirecting(true);
         if (typeof window !== "undefined") {
           localStorage.clear();
           sessionStorage.clear();
         }
         router.replace("/login");
+        return;
       }
-      return;
-    }
 
-    // Authenticated and verified, but not admin: redirect to user dashboard
-    if (!user?.is_admin) {
-      if (!isRedirecting) {
+      // Case 3: Authenticated and verified but not admin
+      if (user && user.is_verified && !user.is_admin) {
+        setCurrentStep("Redirecting to user dashboard...");
         setIsRedirecting(true);
         router.replace("/user/dashboard");
+        return;
       }
-      return;
+
+      // Case 4: Authenticated, verified, and admin - access granted
+      if (user && user.is_verified && user.is_admin) {
+        setCurrentStep("Access granted!");
+        // Small delay to show success message before rendering content
+        const timer = setTimeout(() => {
+          setCurrentStep("");
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+
+      // Case 5: Fallback - something unexpected, wait a bit more
+      setCurrentStep("Verifying permissions...");
+      const fallbackTimer = setTimeout(() => {
+        if (!user) {
+          setIsRedirecting(true);
+          router.replace("/login");
+        }
+      }, 1000);
+      return () => clearTimeout(fallbackTimer);
     }
+  }, [
+    isLoading,
+    isAuthenticated,
+    user,
+    router,
+    authCheckComplete,
+    isRedirecting,
+  ]);
 
-    // Authenticated, verified, and admin: allow access
-    setIsChecking(false);
-  }, [isLoading, isAuthenticated, user, router, isRedirecting]);
+  // Show loading state until everything is properly resolved
+  const shouldShowLoading =
+    isLoading ||
+    !authCheckComplete ||
+    isRedirecting ||
+    currentStep !== "" ||
+    (authCheckComplete && !user) ||
+    (authCheckComplete && user && !user.is_admin && !isRedirecting);
 
-  if (isChecking || isLoading || isRedirecting) {
+  if (shouldShowLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">
@@ -69,7 +126,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-gray-900">
-              {isRedirecting ? "Redirecting..." : "Verifying access..."}
+              {currentStep || "Verifying access..."}
             </p>
             <p className="text-xs text-gray-500 mt-1">Please wait a moment</p>
           </div>
@@ -78,8 +135,8 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
     );
   }
 
-  // If not admin, show fallback or access denied
-  if (!user?.is_admin) {
+  // Final check: if we've completed all checks and user is not admin, show access denied
+  if (authCheckComplete && user && (!user.is_admin || !user.is_verified)) {
     return (
       fallback || (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -100,10 +157,14 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
               </svg>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              Admin Access Required
+              {!user?.is_verified
+                ? "Account Not Verified"
+                : "Admin Access Required"}
             </h2>
             <p className="text-gray-600 mb-6">
-              You must be an admin to access this page.
+              {!user?.is_verified
+                ? "Your account needs to be verified to access this page."
+                : "You must be an admin to access this page."}
             </p>
             <button
               onClick={() => router.replace("/login")}
@@ -117,6 +178,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
     );
   }
 
+  // Only render children if user is authenticated, verified, and admin
   return <>{children}</>;
 };
 
