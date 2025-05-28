@@ -1,19 +1,101 @@
 // utils/axiosInterceptors.ts
-import axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  AxiosError,
-} from "axios";
-import { sessionManager } from "./sessionManager";
+import axios from "axios";
+import { SessionManager } from "./sessionManager";
 import { AuthTokens } from "../types/auth";
+
+// Manual type definitions for Axios (compatible with version 1.9.0)
+export interface AxiosRequestConfig {
+  url?: string;
+  method?: string;
+  baseURL?: string;
+  headers?: Record<string, string>;
+  params?: any;
+  data?: any;
+  timeout?: number;
+  withCredentials?: boolean;
+  metadata?: {
+    startTime?: number;
+    [key: string]: any;
+  };
+  _retry?: boolean;
+  [key: string]: any;
+}
+
+export interface AxiosResponse<T = any> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: any;
+  config: AxiosRequestConfig;
+  request?: any;
+}
+
+export interface AxiosError<T = any> {
+  config?: AxiosRequestConfig;
+  code?: string;
+  request?: any;
+  response?: AxiosResponse<T>;
+  isAxiosError: boolean;
+  message: string;
+  name: string;
+  stack?: string;
+}
+
+export interface AxiosInstance {
+  (config: AxiosRequestConfig): Promise<AxiosResponse>;
+  (url: string, config?: AxiosRequestConfig): Promise<AxiosResponse>;
+  defaults: AxiosRequestConfig;
+  interceptors: {
+    request: AxiosInterceptorManager<AxiosRequestConfig>;
+    response: AxiosInterceptorManager<AxiosResponse>;
+  };
+  get<T = any>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>>;
+  delete<T = any>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>>;
+  head<T = any>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>>;
+  options<T = any>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>>;
+  post<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>>;
+  put<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>>;
+  patch<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>>;
+}
+
+export interface AxiosInterceptorManager<V> {
+  use<T = V>(
+    onFulfilled?: (value: V) => T | Promise<T>,
+    onRejected?: (error: any) => any
+  ): number;
+  eject(id: number): void;
+}
 
 interface QueuedRequest {
   resolve: (token: string) => void;
   reject: (error: any) => void;
 }
 
-class AxiosInterceptorManager {
+class AxiosInterceptorManagerClass {
   private isRefreshing = false;
   private failedQueue: QueuedRequest[] = [];
 
@@ -30,7 +112,7 @@ class AxiosInterceptorManager {
           return config;
         }
 
-        const token = sessionManager.getAccessToken();
+        const token = SessionManager.getAccessToken();
 
         if (token) {
           config.headers = {
@@ -96,7 +178,7 @@ class AxiosInterceptorManager {
           this.isRefreshing = true;
 
           try {
-            const refreshToken = sessionManager.getRefreshToken();
+            const refreshToken = SessionManager.getRefreshToken();
 
             if (!refreshToken) {
               throw new Error("No refresh token available");
@@ -110,7 +192,7 @@ class AxiosInterceptorManager {
             const newTokens: AuthTokens = response.data;
 
             // Update session with new tokens
-            sessionManager.updateTokens(newTokens);
+            SessionManager.updateTokens(newTokens);
 
             // Process queued requests
             this.processQueue(null, newTokens.access_token);
@@ -125,7 +207,7 @@ class AxiosInterceptorManager {
           } catch (refreshError) {
             // Refresh failed, clear session and redirect to login
             this.processQueue(refreshError, null);
-            sessionManager.clearSession();
+            SessionManager.clearSession();
 
             // Emit event for auth failure (can be caught by auth context)
             if (typeof window !== "undefined") {
@@ -192,7 +274,7 @@ class AxiosInterceptorManager {
 }
 
 // Create and export interceptor manager instance
-export const interceptorManager = new AxiosInterceptorManager();
+export const interceptorManager = new AxiosInterceptorManagerClass();
 
 // Enhanced API client factory
 export const createApiClient = (
@@ -207,12 +289,27 @@ export const createApiClient = (
       "Content-Type": "application/json",
     },
     ...options,
-  });
+  }) as unknown as AxiosInstance;
 
   // Setup interceptors
   interceptorManager.setupInterceptors(apiClient);
 
-  return apiClient;
+  // Add missing 'options' method to match AxiosInstance interface
+  const typedApiClient = apiClient as AxiosInstance;
+  if (!("options" in typedApiClient)) {
+    (typedApiClient as any).options = function <T = any>(
+      url: string,
+      config?: AxiosRequestConfig
+    ): Promise<AxiosResponse<T>> {
+      return (apiClient as any).request({
+        ...config,
+        method: "options",
+        url,
+      });
+    };
+  }
+
+  return typedApiClient;
 };
 
 // Default API client (backwards compatible with existing code)
