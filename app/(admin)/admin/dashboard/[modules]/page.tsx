@@ -27,7 +27,7 @@ export default function AdminModulePage({
     cookies: <CookiesModule />,
     "cookies-manager": <CookiesManagerModule />,
 
-    subscription: <SubscriptionsModule />,
+    subscriptions: <SubscriptionsModule />,
     "user-services": <UserServiceModule />,
     "login-services": <LoginServiceModule />,
 
