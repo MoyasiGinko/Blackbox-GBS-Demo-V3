@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 
 const DashboardPage: React.FC = () => {
   const { state, logout } = useAuth();

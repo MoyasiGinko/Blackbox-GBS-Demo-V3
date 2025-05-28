@@ -1,4 +1,4 @@
-import DashboardPage from "@/components/adminPanel/dashboard";
+import DashboardPage from "@/components/adminPanel/modules/DashboardModule";
 import AdminProtectedRoute from "@/components/AdminProtectedRoute";
 import React from "react";
 
