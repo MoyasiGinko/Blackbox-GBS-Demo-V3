@@ -32,10 +32,10 @@ const AdminSidebar: React.FC = () => {
 
   return (
     <aside className="h-screen w-64 bg-gray-900 text-white flex flex-col py-6 px-3 border-r border-gray-800 sticky top-0 shadow-lg">
-      <div className="mb-8 px-3">
+      <div className="mb-8 px-3 flex justify-start">
         <button
           onClick={() => router.push("/admin/dashboard/")}
-          className="flex items-center justify-center space-x-2 w-full"
+          className="flex items-center space-x-2"
         >
           <span className="text-xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
             Admin Panel
