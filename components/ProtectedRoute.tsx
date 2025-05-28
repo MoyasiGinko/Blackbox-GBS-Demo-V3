@@ -19,51 +19,76 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, isAuthenticated, isLoading } = state;
   const router = useRouter();
 
-  // Track whether we've completed the authentication check
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
-  // Track if we're in the process of redirecting
+  // Initialize as checking - this ensures loading shows first
+  const [isChecking, setIsChecking] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
-    // Only proceed when auth loading is complete
-    if (!isLoading) {
-      if (!isAuthenticated) {
-        setIsRedirecting(true);
-        router.replace("/login");
-        return; // Don't set isAuthChecked to true if redirecting
+    const checkAuthentication = async () => {
+      // Wait for auth context to finish loading
+      if (isLoading) {
+        return; // Keep showing loading while auth context loads
       }
 
-      // Authentication check is complete
-      setIsAuthChecked(true);
-    }
+      // Now we can check authentication status
+      if (!isAuthenticated) {
+        setIsRedirecting(true);
+        // Add small delay to show redirecting message
+        setTimeout(() => {
+          router.replace("/login");
+        }, 500);
+        return;
+      }
+
+      // If we reach here, user is authenticated
+      // Small delay to prevent flash (optional)
+      setTimeout(() => {
+        setIsChecking(false);
+      }, 300);
+    };
+
+    checkAuthentication();
   }, [isLoading, isAuthenticated, router]);
 
-  // Always show loading state first - before any authentication checks
-  // This ensures no flash of unauthorized content
-  if (isLoading || !isAuthChecked || isRedirecting) {
+  // ALWAYS show loading state first - this is the key!
+  // Show loading if:
+  // 1. Still checking authentication (initial state)
+  // 2. Auth context is still loading
+  // 3. Currently redirecting
+  if (isChecking || isLoading || isRedirecting) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
-          <p className="text-sm text-gray-600">
-            {isRedirecting ? "Redirecting..." : "Loading..."}
-          </p>
+          <div className="relative">
+            {/* Outer spinning ring */}
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200"></div>
+            {/* Inner spinning ring */}
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-500 border-t-transparent absolute top-0 left-0"></div>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-medium text-gray-900">
+              {isRedirecting
+                ? "Redirecting to login..."
+                : "Verifying authentication..."}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Please wait a moment</p>
+          </div>
         </div>
       </div>
     );
   }
 
-  // At this point we know: !isLoading && isAuthChecked && !isRedirecting && isAuthenticated
+  // At this point: !isChecking && !isLoading && !isRedirecting && isAuthenticated
 
   // Check role-based access for authenticated users
   if (requiredRole && user?.role !== requiredRole) {
     return (
       fallback || (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center max-w-md mx-auto p-6">
-            <div className="mb-4">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center max-w-md mx-auto p-8 bg-white rounded-lg shadow-lg">
+            <div className="mb-6">
               <svg
-                className="mx-auto h-16 w-16 text-red-500"
+                className="mx-auto h-20 w-20 text-red-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -76,25 +101,35 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
               Access Denied
             </h2>
-            <p className="text-gray-600 mb-4">
-              You don't have permission to access this page.
+            <p className="text-gray-600 mb-6">
+              You don't have the required permissions to access this page.
             </p>
-            <p className="text-sm text-gray-500">
-              Required role: <span className="font-medium">{requiredRole}</span>
-              <br />
-              Your role:{" "}
-              <span className="font-medium">{user?.role || "None"}</span>
-            </p>
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">Required role:</span>{" "}
+                {requiredRole}
+              </p>
+              <p className="text-sm text-gray-700 mt-1">
+                <span className="font-semibold">Your role:</span>{" "}
+                {user?.role || "None assigned"}
+              </p>
+            </div>
+            <button
+              onClick={() => router.back()}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+            >
+              Go Back
+            </button>
           </div>
         </div>
       )
     );
   }
 
-  // Only render children when fully authorized and checked
+  // SUCCESS: User is authenticated and authorized - render children
   return <>{children}</>;
 };
 
