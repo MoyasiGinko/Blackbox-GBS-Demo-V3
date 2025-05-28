@@ -14,7 +14,12 @@ export const setCookie = (
   value: string,
   options: CookieOptions = {}
 ): void => {
+
   if (typeof document === "undefined") return;
+
+  // Debug: Log all cookie set attempts
+  // eslint-disable-next-line no-console
+  console.log("[setCookie]", { name, value, options });
 
   const {
     maxAge,
@@ -53,6 +58,9 @@ export const setCookie = (
   cookieString += `; SameSite=${sameSite}`;
 
   document.cookie = cookieString;
+  // Debug: Log the final cookie string
+  // eslint-disable-next-line no-console
+  console.log("[setCookie] document.cookie:", cookieString);
 };
 
 export const getCookie = (name: string): string | null => {
