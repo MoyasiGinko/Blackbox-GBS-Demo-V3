@@ -44,9 +44,8 @@ const links = [
     href: "/admin/dashboard/cookies",
     icon: CakeIcon,
     submenu: [
-      { label: "Cookie List", href: "/admin/dashboard/cookies" },
-      { label: "Cookie Settings", href: "/admin/dashboard/cookies/settings" },
-      { label: "Consent Manager", href: "/admin/dashboard/cookies/consent" },
+      { label: "List Cookies", href: "/admin/dashboard/cookies" },
+      { label: "Cookies Manager", href: "/admin/dashboard/cookies-manager" },
     ],
   },
   { label: "Settings", href: "/admin/dashboard/settings", icon: CogIcon },

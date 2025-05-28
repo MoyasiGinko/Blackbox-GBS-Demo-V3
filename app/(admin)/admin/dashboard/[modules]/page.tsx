@@ -8,6 +8,7 @@ import CookiesModule from "@/components/adminPanel/modules/CookiesModule";
 import SubscriptionsModule from "@/components/adminPanel/modules/SubscriptionsModule";
 import UserServiceModule from "@/components/adminPanel/modules/UserServiceModule";
 import LoginServiceModule from "@/components/adminPanel/modules/LoginServiceModule";
+import CookiesManagerModule from "@/components/adminPanel/modules/CookieManagerModule";
 
 export default function AdminModulePage({
   params,
@@ -24,6 +25,8 @@ export default function AdminModulePage({
     payments: <PaymentsModule />,
     settings: <SettingsModule />,
     cookies: <CookiesModule />,
+    "cookies-manager": <CookiesManagerModule />,
+
     subscription: <SubscriptionsModule />,
     "user-services": <UserServiceModule />,
     "login-services": <LoginServiceModule />,
