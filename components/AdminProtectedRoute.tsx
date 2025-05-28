@@ -1,18 +1,16 @@
-// components/ProtectedRoute.tsx - Enhanced secure route protection component
+// components/AdminProtectedRoute.tsx - Admin role-based protection
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 
-interface ProtectedRouteProps {
+interface AdminProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: string;
   fallback?: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
   children,
-  requiredRole,
   fallback,
 }) => {
   const { state } = useAuth();
@@ -25,51 +23,32 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   useEffect(() => {
     const checkAuthentication = async () => {
-      // Wait for auth context to finish loading
-      if (isLoading) {
-        return; // Keep showing loading while auth context loads
-      }
-
-      // Now we can check authentication status
-      if (!isAuthenticated) {
+      if (isLoading) return;
+      if (!isAuthenticated || user?.role !== "admin") {
         setIsRedirecting(true);
-        // Add small delay to show redirecting message
         setTimeout(() => {
           router.replace("/login");
         }, 500);
         return;
       }
-
-      // If we reach here, user is authenticated
-      // Small delay to prevent flash (optional)
       setTimeout(() => {
         setIsChecking(false);
       }, 300);
     };
-
     checkAuthentication();
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, user, router]);
 
-  // ALWAYS show loading state first - this is the key!
-  // Show loading if:
-  // 1. Still checking authentication (initial state)
-  // 2. Auth context is still loading
-  // 3. Currently redirecting
   if (isChecking || isLoading || isRedirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            {/* Outer spinning ring */}
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200"></div>
-            {/* Inner spinning ring */}
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-500 border-t-transparent absolute top-0 left-0"></div>
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-gray-900">
-              {isRedirecting
-                ? "Redirecting to login..."
-                : "Verifying authentication..."}
+              {isRedirecting ? "Redirecting to login..." : "Verifying admin access..."}
             </p>
             <p className="text-xs text-gray-500 mt-1">Please wait a moment</p>
           </div>
@@ -78,50 +57,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // At this point: !isChecking && !isLoading && !isRedirecting && isAuthenticated
-
-  // Check role-based access for authenticated users
-  if (requiredRole && user?.role !== requiredRole) {
+  // If not admin, show fallback or access denied
+  if (user?.role !== "admin") {
     return (
       fallback || (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center max-w-md mx-auto p-8 bg-white rounded-lg shadow-lg">
             <div className="mb-6">
-              <svg
-                className="mx-auto h-20 w-20 text-red-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
+              <svg className="mx-auto h-20 w-20 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
-              Access Denied
-            </h2>
-            <p className="text-gray-600 mb-6">
-              You don't have the required permissions to access this page.
-            </p>
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">Required role:</span>{" "}
-                {requiredRole}
-              </p>
-              <p className="text-sm text-gray-700 mt-1">
-                <span className="font-semibold">Your role:</span>{" "}
-                {user?.role || "None assigned"}
-              </p>
-            </div>
-            <button
-              onClick={() => router.back()}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-            >
-              Go Back
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Admin Access Required</h2>
+            <p className="text-gray-600 mb-6">You must be an admin to access this page.</p>
+            <button onClick={() => router.replace("/login")}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+              Go to Login
             </button>
           </div>
         </div>
@@ -129,8 +80,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // SUCCESS: User is authenticated and authorized - render children
   return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default AdminProtectedRoute;
