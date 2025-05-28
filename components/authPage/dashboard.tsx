@@ -12,9 +12,9 @@ const DashboardPage: React.FC = () => {
     await logout();
   };
 
-  if (!user) {
-    return <div>Loading...</div>;
-  }
+  // if (!user) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">

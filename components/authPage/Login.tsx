@@ -11,6 +11,7 @@ const LoginPage: React.FC = () => {
   const { state, login } = useAuth();
   const { addNotification } = useNotifications();
   const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -20,11 +21,23 @@ const LoginPage: React.FC = () => {
     Record<string, string>
   >({});
 
-  // Redirect if already authenticated
+  // Check authentication status immediately on component mount
   useEffect(() => {
-    if (state.isAuthenticated) {
-      router.replace("/dashboard");
-    }
+    const checkAuthStatus = async () => {
+      // Wait for auth state to be properly initialized
+      setIsChecking(true);
+      try {
+        // If authenticated, redirect to dashboard
+        if (state.isAuthenticated) {
+          router.replace("/dashboard");
+        }
+      } finally {
+        // Mark checking as complete regardless of outcome
+        setIsChecking(false);
+      }
+    };
+
+    checkAuthStatus();
   }, [state.isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,7 +70,6 @@ const LoginPage: React.FC = () => {
     }
   };
 
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -68,8 +80,8 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  if (state.isAuthenticated) {
-    // Show loading spinner while redirecting
+  // Show loading spinner while checking auth status or redirecting
+  if (isChecking || state.isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500"></div>
@@ -87,6 +99,7 @@ const LoginPage: React.FC = () => {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {/* Form content remains the same */}
           <div className="space-y-4">
             <div>
               <label
@@ -145,11 +158,8 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Error display removed because 'error' is not available from useAuth() */}
-
           <button
             type="submit"
-            // disabled={isLoading}
             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Sign in
@@ -161,72 +171,3 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
-
-// Usage Examples:
-
-// 1. Using in a page that requires authentication:
-/*
-export default function ServicesPage() {
-  return (
-    <ProtectedRoute>
-      <ServicesPageContent />
-    </ProtectedRoute>
-  );
-}
-*/
-
-// 2. Using in an admin page:
-/*
-export default function AdminPage() {
-  return (
-    <ProtectedRoute requiredRole="admin">
-      <AdminPageContent />
-    </ProtectedRoute>
-  );
-}
-*/
-
-// 3. Using API hooks in components:
-/*
-function ServicesList() {
-  const { data: services, isLoading, error } = useServices();
-  const createServiceMutation = useCreateService({
-    onSuccess: () => {
-      // Handle success
-    }
-  });
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-
-  return (
-    <div>
-      {services?.map(service => (
-        <div key={service.id}>{service.name}</div>
-      ))}
-      <button onClick={() => createServiceMutation.mutate(newServiceData)}>
-        Create Service
-      </button>
-    </div>
-  );
-}
-*/
-
-// 4. Using notifications:
-/*
-function SomeComponent() {
-  const { addNotification } = useNotifications();
-
-  const handleAction = () => {
-    addNotification({
-      type: 'success',
-      title: 'Action completed',
-      message: 'The action was completed successfully',
-      action: {
-        label: 'View Details',
-        onClick: () => router.push('/details')
-      }
-    });
-  };
-}
-*/
