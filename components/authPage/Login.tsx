@@ -33,12 +33,16 @@ const LoginPage: React.FC = () => {
       }
 
       try {
-        // If user is already authenticated, redirect to dashboard
+        // If user is already authenticated, redirect based on role
         if (state.isAuthenticated) {
           setIsRedirecting(true);
           // Add small delay to show redirecting message
           setTimeout(() => {
-            router.replace("/dashboard");
+            if (state.user?.role === "admin") {
+              router.replace("/admin/dashboard");
+            } else {
+              router.replace("/user/dashboard");
+            }
           }, 500);
           return;
         }
@@ -56,7 +60,7 @@ const LoginPage: React.FC = () => {
     };
 
     checkAuthStatus();
-  }, [state.isLoading, state.isAuthenticated, router]);
+  }, [state.isLoading, state.isAuthenticated, state.user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
