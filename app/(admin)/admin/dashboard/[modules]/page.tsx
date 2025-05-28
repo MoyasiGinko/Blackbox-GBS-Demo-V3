@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import UsersModule from "@/components/adminPanel/modules/UsersModule";
 import ServicesModule from "@/components/adminPanel/modules/ServicesModule";
@@ -10,13 +9,14 @@ import UserServiceModule from "@/components/adminPanel/modules/UserServiceModule
 import LoginServiceModule from "@/components/adminPanel/modules/LoginServiceModule";
 import CookiesManagerModule from "@/components/adminPanel/modules/CookieManagerModule";
 
-export default function AdminModulePage({
+export default async function AdminModulePage({
   params,
 }: {
-  params: { modules: string };
+  params: Promise<{ modules: string }> | { modules: string };
 }) {
-  // Extract the module name from the URL
-  const currentModule = params.modules;
+  // Unwrap the params promise if necessary
+  const actualParams = await Promise.resolve(params);
+  const currentModule = actualParams.modules;
 
   // Simplified map using only module names
   const modulesMap: Record<string, React.ReactNode> = {
