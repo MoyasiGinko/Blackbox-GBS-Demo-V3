@@ -1,7 +1,7 @@
 // pages/login.tsx - Example login page using the new system
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNotifications } from "../../context/NotificationContext";
 import { validateForm, loginSchema } from "../../utils/validation";
@@ -19,6 +19,13 @@ const LoginPage: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (state.isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [state.isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +57,7 @@ const LoginPage: React.FC = () => {
     }
   };
 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -58,14 +66,16 @@ const LoginPage: React.FC = () => {
     if (validationErrors[name]) {
       setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     }
-
-    if (state.isAuthenticated) {
-      console.log(
-        "Checking if the context works, user is already authenticated, redirecting..."
-      );
-      // router.push("/dashboard");
-    }
   };
+
+  if (state.isAuthenticated) {
+    // Show loading spinner while redirecting
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

@@ -62,14 +62,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       };
       const expiresAt = Date.now() + tokens.expires_in * 1000;
 
-      // Now fetch profile (token will be in memory, not cookie, but axios interceptor uses SessionManager.getAccessToken)
-      const user = (await profileApi.getProfile()).data;
-      const sessionData: SessionData = { user, tokens, expiresAt };
-      if (typeof window === "undefined") {
-        console.warn("[AuthContext] Attempted to set session on server. Session/cookies will NOT be set.");
-      } else {
-        SessionManager.setSession(sessionData);
+      // 1. Set session with tokens and a placeholder user (so axios interceptor can use the token)
+      if (typeof window !== "undefined") {
+        SessionManager.setSession({ user: {} as any, tokens, expiresAt });
       }
+
+      // 2. Fetch the real user profile (now that token is available)
+      const user = (await profileApi.getProfile()).data;
+
+      // 3. Update session with real user
+      if (typeof window !== "undefined") {
+        SessionManager.setSession({ user, tokens, expiresAt });
+      }
+
       setState({
         user,
         tokens,
