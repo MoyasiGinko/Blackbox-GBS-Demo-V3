@@ -4,8 +4,10 @@ import UsersModule from "@/components/adminPanel/modules/UsersModule";
 import ServicesModule from "@/components/adminPanel/modules/ServicesModule";
 import PaymentsModule from "@/components/adminPanel/modules/PaymentsModule";
 import SettingsModule from "@/components/adminPanel/modules/SettingsModule";
-import { cookies } from "next/headers";
 import CookiesModule from "@/components/adminPanel/modules/CookiesModule";
+import SubscriptionsModule from "@/components/adminPanel/modules/SubscriptionsModule";
+import UserServiceModule from "@/components/adminPanel/modules/UserServiceModule";
+import LoginServiceModule from "@/components/adminPanel/modules/LoginServiceModule";
 
 export default function AdminModulePage({
   params,
@@ -22,6 +24,10 @@ export default function AdminModulePage({
     payments: <PaymentsModule />,
     settings: <SettingsModule />,
     cookies: <CookiesModule />,
+    subscription: <SubscriptionsModule />,
+    "user-services": <UserServiceModule />,
+    "login-services": <LoginServiceModule />,
+
     // Add more modules as needed
   };
 
