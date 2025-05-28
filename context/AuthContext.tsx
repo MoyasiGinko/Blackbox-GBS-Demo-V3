@@ -1,12 +1,7 @@
 // context/AuthContext.tsx
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-} from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SessionManager } from "../utils/sessionManager";
 import { queryKeys, queryInvalidation } from "../lib/queryClient";
@@ -33,7 +28,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     isLoading: false,
     error: null,
   });
-
   // Initialize auth state from session
   useEffect(() => {
     const session = SessionManager.getSession();
@@ -46,13 +40,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         error: null,
       });
     }
-  }, []);
+
+    // Listen for session expiry events from axios interceptor
+    const handleSessionExpired = () => {
+      setState({
+        user: null,
+        tokens: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: "Session expired. Please log in again.",
+      });
+      queryClient.clear();
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("auth:session-expired", handleSessionExpired);
+      return () => {
+        window.removeEventListener(
+          "auth:session-expired",
+          handleSessionExpired
+        );
+      };
+    }
+  }, [queryClient]);
 
   // Login method
   const login = async (credentials: LoginCredentials) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
-      const tokenRes = await authApi.login(credentials.email, credentials.password);
+      const tokenRes = await authApi.login(
+        credentials.email,
+        credentials.password
+      );
       // Map API response to AuthTokens interface
       const apiTokens: any = tokenRes.data;
       const tokens: AuthTokens = {
@@ -80,7 +99,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           tokens: null,
           isAuthenticated: false,
           isLoading: false,
-          error: "Account is not verified. Please verify your email before logging in.",
+          error:
+            "Account is not verified. Please verify your email before logging in.",
         });
         return;
       }

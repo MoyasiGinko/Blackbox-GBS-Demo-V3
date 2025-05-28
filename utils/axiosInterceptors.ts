@@ -202,12 +202,21 @@ class AxiosInterceptorManagerClass {
       }
     );
   }
-
   private async refreshAccessToken(
     apiClient: AxiosInstance,
     refreshToken: string
   ): Promise<AxiosResponse> {
-    return apiClient.post("/auth/refresh/", { refresh_token: refreshToken });
+    // Make a direct call without going through interceptors again
+    return axios.post(
+      `${apiClient.defaults.baseURL}/auth/refresh/`,
+      { refresh: refreshToken }, // Use 'refresh' instead of 'refresh_token'
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      }
+    );
   }
 
   private processQueue(error: any, token: string | null): void {

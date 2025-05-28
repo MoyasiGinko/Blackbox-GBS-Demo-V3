@@ -1,6 +1,7 @@
 // utils/api.ts
 import { apiClient } from "./axiosInterceptors";
 import { User, AuthTokens, LoginRequest } from "@/types/auth";
+import { SessionManager } from "./sessionManager";
 
 // Admin APIs
 export const adminApi = {
@@ -16,7 +17,11 @@ export const adminApi = {
 export const authApi = {
   login: (email: string, password: string) =>
     apiClient.post<AuthTokens>("/auth/login/", { email, password }),
-  refresh: () => apiClient.post<AuthTokens>("/auth/refresh/"),
+  refresh: (refreshToken?: string) => {
+    const token = refreshToken || SessionManager.getRefreshToken();
+    if (!token) throw new Error("No refresh token available");
+    return apiClient.post<AuthTokens>("/auth/refresh/", { refresh: token });
+  },
   logout: () => apiClient.post("/auth/logout/"),
   forgotPassword: (email: string) =>
     apiClient.post("/auth/forgot-password/", { email }),

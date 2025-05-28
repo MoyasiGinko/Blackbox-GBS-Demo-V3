@@ -4,7 +4,7 @@
 import React from "react";
 import { useAuth } from "../../../context/AuthContext";
 
-const DashboardPage: React.FC = () => {
+const DashboardModule: React.FC = () => {
   const { state, logout } = useAuth();
   const { user } = state;
 
@@ -59,4 +59,4 @@ const DashboardPage: React.FC = () => {
   );
 };
 
-export default DashboardPage;
+export default DashboardModule;

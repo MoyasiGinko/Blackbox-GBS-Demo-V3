@@ -6,6 +6,7 @@ export interface User {
   role?: string;
   is_admin?: boolean;
   is_verified?: boolean;
+  is_active?: boolean;
   date_joined?: string;
 }
 
