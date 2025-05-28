@@ -37,7 +37,7 @@ const AdminSidebar: React.FC = () => {
           onClick={() => router.push("/admin/dashboard/")}
           className="flex items-center space-x-2"
         >
-          <span className="text-xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+          <span className="text-xl font-bold bg-gradient-to-r from-gray-50 to-gray-100 bg-clip-text text-transparent">
             Admin Panel
           </span>
         </button>
