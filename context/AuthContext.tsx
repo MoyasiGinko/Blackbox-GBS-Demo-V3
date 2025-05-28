@@ -53,7 +53,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
       const tokenRes = await authApi.login(credentials.email, credentials.password);
-      const tokens = tokenRes.data;
+      // Map API response to AuthTokens interface
+      const apiTokens: any = tokenRes.data;
+      const tokens: AuthTokens = {
+        access_token: apiTokens.access || apiTokens.access_token,
+        refresh_token: apiTokens.refresh || apiTokens.refresh_token,
+        expires_in: apiTokens.expires_in || 3600, // fallback to 1 hour if not provided
+      };
       const profileRes = await profileApi.getProfile();
       const user = profileRes.data;
       const expiresAt = Date.now() + tokens.expires_in * 1000;
