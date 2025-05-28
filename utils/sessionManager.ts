@@ -67,6 +67,9 @@ class SessionManagerClass {
   }
 
   setSession(sessionData: SessionData): void {
+    // Debug: Log when setSession is called
+    // eslint-disable-next-line no-console
+    console.log('[SessionManager.setSession] called with:', sessionData);
     this.session = sessionData;
 
     if (typeof window !== "undefined") {
@@ -97,6 +100,9 @@ class SessionManagerClass {
   }
 
   clearSession(): void {
+    // Debug: Log when clearSession is called
+    // eslint-disable-next-line no-console
+    console.log('[SessionManager.clearSession] called');
     this.session = null;
 
     if (typeof window !== "undefined") {
