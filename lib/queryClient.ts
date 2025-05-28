@@ -5,7 +5,7 @@ import {
   QueryCache,
   MutationCache,
 } from "@tanstack/react-query";
-import { sessionManager } from "../utils/sessionManager";
+import { SessionManager } from "../utils/sessionManager";
 
 // Default query options
 const defaultQueryOptions: DefaultOptions = {
@@ -39,7 +39,7 @@ const queryCache = new QueryCache({
 
     // Handle auth errors globally
     if (error?.status === 401) {
-      sessionManager.clearSession();
+      SessionManager.clearSession();
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("auth:session-expired"));
       }
@@ -54,7 +54,7 @@ const mutationCache = new MutationCache({
 
     // Handle auth errors globally
     if (error?.status === 401) {
-      sessionManager.clearSession();
+      SessionManager.clearSession();
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("auth:session-expired"));
       }
@@ -130,7 +130,7 @@ export const queryKeys = {
 // Prefetch utilities
 export const prefetchQueries = {
   profile: async () => {
-    if (sessionManager.isSessionValid()) {
+    if (SessionManager.isSessionValid()) {
       await queryClient.prefetchQuery({
         queryKey: queryKeys.profile(),
         queryFn: async () => {

@@ -95,7 +95,7 @@ const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     <QueryClientProvider client={client}>
       {children}
       {process.env.NODE_ENV === "development" && (
-        <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+        <ReactQueryDevtools initialIsOpen={false} position="bottom" />
       )}
     </QueryClientProvider>
   );

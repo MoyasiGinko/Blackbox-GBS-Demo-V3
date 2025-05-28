@@ -78,9 +78,8 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-      const { payload } = (await jwtVerify(accessToken, JWT_SECRET)) as {
-        payload: AuthPayload;
-      };
+      const jwtResult = await jwtVerify(accessToken, JWT_SECRET);
+      const payload = jwtResult.payload as AuthPayload;
 
       // Check admin access
       if (isAdminRoute && payload.role !== "admin") {

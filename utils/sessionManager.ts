@@ -149,6 +149,39 @@ class SessionManagerClass {
     const session = this.getSession();
     return session && session.user ? session.user : null;
   }
+
+  getSessionInfo(): {
+    user: User | null;
+    isValid: boolean;
+    shouldRefresh: boolean;
+    timeUntilExpiry: number;
+  } {
+    const session = this.getSession();
+    if (!session) {
+      return {
+        user: null,
+        isValid: false,
+        shouldRefresh: false,
+        timeUntilExpiry: 0,
+      };
+    }
+
+    const now = Date.now();
+    const isValid = now < session.expiresAt;
+    const shouldRefresh =
+      now >= session.expiresAt - this.config.tokenRefreshThreshold * 60 * 1000;
+    const timeUntilExpiry = Math.max(
+      0,
+      Math.floor((session.expiresAt - now) / 1000)
+    );
+
+    return {
+      user: session.user,
+      isValid,
+      shouldRefresh,
+      timeUntilExpiry,
+    };
+  }
 }
 
 export const SessionManager = new SessionManagerClass();

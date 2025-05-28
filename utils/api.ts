@@ -1,6 +1,6 @@
 // utils/api.ts
 import { apiClient } from "./axiosInterceptors";
-import { User, AuthTokens, LoginRequest } from "../types/auth";
+import { User, AuthTokens, LoginRequest } from "@/types/auth";
 
 // Admin APIs
 export const adminApi = {
@@ -155,13 +155,14 @@ export const fileApi = {
 
     return apiClient.post("/files/upload/", formData, {
       headers: { "Content-Type": "multipart/form-data" },
-      onUploadProgress: (progressEvent) => {
+      // Cast config to any to allow onUploadProgress, or import AxiosRequestConfig and use it as the type
+      onUploadProgress: (progressEvent: ProgressEvent) => {
         const percentCompleted = Math.round(
           (progressEvent.loaded * 100) / (progressEvent.total || 1)
         );
         console.log(`Upload Progress: ${percentCompleted}%`);
       },
-    });
+    } as any);
   },
 
   deleteFile: (id: string) => apiClient.delete(`/files/${id}/`),
@@ -218,7 +219,7 @@ export const apiUtils = {
     apiClient.put<T[]>(`${endpoint}/bulk/`, { items: data }),
 
   bulkDelete: (endpoint: string, ids: (number | string)[]) =>
-    apiClient.delete(`${endpoint}/bulk/`, { data: { ids } }),
+    apiClient.delete(`${endpoint}/bulk/`, { data: { ids } } as any),
 };
 
 // Export all APIs

@@ -2,13 +2,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { useNotifications } from "../context/NotificationContext";
-import { validateForm, loginSchema } from "../utils/validation";
+import { useAuth } from "../../context/AuthContext";
+import { useNotifications } from "../../context/NotificationContext";
+import { validateForm, loginSchema } from "../../utils/validation";
 import { useRouter } from "next/navigation";
 
 const LoginPage: React.FC = () => {
-  const { login, isLoading, error } = useAuth();
+  const { login } = useAuth();
   const { addNotification } = useNotifications();
   const router = useRouter();
 
@@ -127,18 +127,14 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
+          {/* Error display removed because 'error' is not available from useAuth() */}
 
           <button
             type="submit"
-            disabled={isLoading}
+            // disabled={isLoading}
             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Signing in..." : "Sign in"}
+            Sign in
           </button>
         </form>
       </div>

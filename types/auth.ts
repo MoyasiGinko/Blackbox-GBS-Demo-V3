@@ -38,3 +38,8 @@ export interface AuthContextType {
   setUser: (user: User | null) => void;
   setTokens: (tokens: AuthTokens | null) => void;
 }
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
