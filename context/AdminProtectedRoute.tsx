@@ -1,7 +1,7 @@
 // components/AdminProtectedRoute.tsx - Admin role-based protection
 "use client";
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "./AuthContext";
 import { useRouter } from "next/navigation";
 
 interface AdminProtectedRouteProps {
