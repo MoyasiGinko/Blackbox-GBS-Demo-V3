@@ -70,8 +70,8 @@ class SessionManagerClass {
     this.session = sessionData;
 
     if (typeof window !== "undefined") {
-      // Store session data in httpOnly cookie (if server supports it)
-      // For client-side, we'll use secure cookie
+      // Only set secure cookies if running on HTTPS
+      const isSecure = window.location.protocol === "https:";
       setCookie(
         this.SESSION_KEY,
         JSON.stringify({
@@ -81,7 +81,7 @@ class SessionManagerClass {
         }),
         {
           maxAge: this.config.sessionTimeout * 60,
-          secure: process.env.NODE_ENV === "production",
+          secure: isSecure,
           sameSite: "strict",
         }
       );
@@ -89,7 +89,7 @@ class SessionManagerClass {
       // Store refresh token separately
       setCookie(this.REFRESH_KEY, sessionData.tokens.refresh_token, {
         maxAge: this.config.sessionTimeout * 60,
-        secure: process.env.NODE_ENV === "production",
+        secure: isSecure,
         sameSite: "strict",
         httpOnly: false, // In production, should be httpOnly
       });

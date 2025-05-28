@@ -64,7 +64,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const user = profileRes.data;
       const expiresAt = Date.now() + tokens.expires_in * 1000;
       const sessionData: SessionData = { user, tokens, expiresAt };
-      SessionManager.setSession(sessionData);
+      if (typeof window === "undefined") {
+        console.warn("[AuthContext] Attempted to set session on server. Session/cookies will NOT be set.");
+      } else {
+        SessionManager.setSession(sessionData);
+      }
       setState({
         user,
         tokens,
@@ -80,7 +84,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         isLoading: false,
         error: err?.message || "Login failed",
       });
-      SessionManager.clearSession();
+      if (typeof window !== "undefined") {
+        SessionManager.clearSession();
+      }
     }
   };
 
